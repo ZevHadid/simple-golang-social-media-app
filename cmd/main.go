@@ -37,6 +37,10 @@ func main() {
 		c.HTML(200, "register.html", nil)
 	})
 
+	r.GET("/login", func(c *gin.Context) {
+		c.HTML(200, "login.html", nil)
+	})
+
 	r.POST("/register", userHandler.Register)
 	r.POST("/login", userHandler.Login)
 
