@@ -31,6 +31,12 @@ func main() {
 
 	r := gin.Default()
 
+	r.LoadHTMLGlob("templates/*") // Add this line to enable HTML template rendering
+
+	r.GET("/register", func(c *gin.Context) {
+		c.HTML(200, "register.html", nil)
+	})
+
 	r.POST("/register", userHandler.Register)
 	r.POST("/login", userHandler.Login)
 
@@ -38,15 +44,15 @@ func main() {
 	protected.Use(middleware.AuthMiddleware())
 	{
 		protected.GET("/home", func(c *gin.Context) {
-			email, _ := c.Get("email")                           // Actually contains email from JWT
-			user, err := userService.FindByEmail(email.(string)) // Fetch user by email
+			email, _ := c.Get("email")
+			user, err := userService.FindByEmail(email.(string))
 			if err != nil {
 				c.JSON(404, gin.H{"error": "User not found"})
 				return
 			}
 			c.JSON(200, gin.H{"message": "Hello " + user.Username})
 		})
-		protected.POST("/logout", userHandler.Logout) // Added logout route
+		protected.POST("/logout", userHandler.Logout)
 	}
 
 	r.Run(":8080")
