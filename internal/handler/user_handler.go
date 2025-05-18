@@ -19,9 +19,10 @@ func NewUserHandler(s service.UserService) *UserHandler {
 
 func (h *UserHandler) Register(c *gin.Context) {
 	username := c.PostForm("username")
+	email := c.PostForm("email")
 	password := c.PostForm("password")
 
-	if err := h.service.Register(username, password); err != nil {
+	if err := h.service.Register(email, username, password); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -29,16 +30,16 @@ func (h *UserHandler) Register(c *gin.Context) {
 }
 
 func (h *UserHandler) Login(c *gin.Context) {
-	username := c.PostForm("username")
+	email := c.PostForm("email")
 	password := c.PostForm("password")
 
-	user, err := h.service.Login(username, password)
+	user, err := h.service.Login(email, password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
-	token, err := utils.GenerateJWT(user.Username)
+	token, err := utils.GenerateJWT(user.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token"})
 		return

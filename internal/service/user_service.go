@@ -8,8 +8,9 @@ import (
 )
 
 type UserService interface {
-	Register(username, password string) error
-	Login(username, password string) (*model.User, error)
+	Register(email, username, password string) error
+	Login(email, password string) (*model.User, error)
+	FindByEmail(email string) (*model.User, error)
 }
 
 type userService struct {
@@ -20,20 +21,21 @@ func NewUserService(r repository.UserRepository) UserService {
 	return &userService{r}
 }
 
-func (s *userService) Register(username, password string) error {
+func (s *userService) Register(email, username, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 	user := &model.User{
+		Email:    email,
 		Username: username,
 		Password: string(hashedPassword),
 	}
 	return s.repo.Create(user)
 }
 
-func (s *userService) Login(username, password string) (*model.User, error) {
-	user, err := s.repo.FindByUsername(username)
+func (s *userService) Login(email, password string) (*model.User, error) {
+	user, err := s.repo.FindByEmail(email)
 	if err != nil {
 		return nil, err
 	}
@@ -41,4 +43,8 @@ func (s *userService) Login(username, password string) (*model.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (s *userService) FindByEmail(email string) (*model.User, error) {
+	return s.repo.FindByEmail(email)
 }

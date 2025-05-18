@@ -38,8 +38,13 @@ func main() {
 	protected.Use(middleware.AuthMiddleware())
 	{
 		protected.GET("/home", func(c *gin.Context) {
-			username, _ := c.Get("username")
-			c.JSON(200, gin.H{"message": "Welcome " + username.(string)})
+			email, _ := c.Get("email")                           // Actually contains email from JWT
+			user, err := userService.FindByEmail(email.(string)) // Fetch user by email
+			if err != nil {
+				c.JSON(404, gin.H{"error": "User not found"})
+				return
+			}
+			c.JSON(200, gin.H{"message": "Hello " + user.Username})
 		})
 		protected.POST("/logout", userHandler.Logout) // Added logout route
 	}
