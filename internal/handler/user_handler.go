@@ -23,10 +23,30 @@ func (h *UserHandler) Register(c *gin.Context) {
 	password := c.PostForm("password")
 
 	if err := h.service.Register(email, username, password); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.HTML(http.StatusInternalServerError, "register.html", gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
+
+	user, err := h.service.Login(email, password)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "login.html", gin.H{
+			"error": "There was a problem loggin in. Please try again.",
+		})
+		return
+	}
+
+	token, err := utils.GenerateJWT(user.Email)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "login.html", gin.H{
+			"error": "Opps... Something went wrong while generating token. Please try again later.",
+		})
+		return
+	}
+
+	c.SetCookie("token", token, 3600, "/", "localhost", false, true)
+	c.Redirect(http.StatusFound, "/home")
 }
 
 func (h *UserHandler) Login(c *gin.Context) {
@@ -35,21 +55,25 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	user, err := h.service.Login(email, password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.HTML(http.StatusInternalServerError, "login.html", gin.H{
+			"error": "Invalid email or password.",
+		})
 		return
 	}
 
 	token, err := utils.GenerateJWT(user.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token"})
+		c.HTML(http.StatusInternalServerError, "login.html", gin.H{
+			"error": "Opps... Something went wrong while generating token. Please try again later.",
+		})
 		return
 	}
 
 	c.SetCookie("token", token, 3600, "/", "localhost", false, true)
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	c.Redirect(http.StatusFound, "/home")
 }
 
 func (h *UserHandler) Logout(c *gin.Context) {
-	c.SetCookie("token", "", -1, "/", "localhost", false, true) // Clear the token cookie
-	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
+	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	c.Redirect(http.StatusFound, "/login")
 }
