@@ -32,6 +32,7 @@ func main() {
 	r := gin.Default()
 
 	r.LoadHTMLGlob("templates/*")
+	r.Static("/assets", "./assets")
 
 	r.GET("/register", func(c *gin.Context) {
 		c.HTML(200, "register.html", nil)
