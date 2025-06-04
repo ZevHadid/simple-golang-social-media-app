@@ -31,6 +31,16 @@ func main() {
 
 	r := gin.Default()
 
+	r.LoadHTMLGlob("templates/*")
+
+	r.GET("/register", func(c *gin.Context) {
+		c.HTML(200, "register.html", nil)
+	})
+
+	r.GET("/login", func(c *gin.Context) {
+		c.HTML(200, "login.html", nil)
+	})
+
 	r.POST("/register", userHandler.Register)
 	r.POST("/login", userHandler.Login)
 
@@ -38,10 +48,17 @@ func main() {
 	protected.Use(middleware.AuthMiddleware())
 	{
 		protected.GET("/home", func(c *gin.Context) {
-			username, _ := c.Get("username")
-			c.JSON(200, gin.H{"message": "Welcome " + username.(string)})
+			email, _ := c.Get("email")
+			user, err := userService.FindByEmail(email.(string))
+			if err != nil {
+				c.JSON(404, gin.H{"error": "User not found"})
+				return
+			}
+			c.HTML(200, "dashboard.html", gin.H{
+				"username": user.Username,
+			})
 		})
-		protected.POST("/logout", userHandler.Logout) // Added logout route
+		protected.POST("/logout", userHandler.Logout)
 	}
 
 	r.Run(":8080")

@@ -15,13 +15,13 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		username, err := utils.ValidateJWT(tokenString)
+		email, err := utils.ValidateJWT(tokenString)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
 
-		c.Set("username", username)
+		c.Set("email", email)
 		c.Next()
 	}
 }
