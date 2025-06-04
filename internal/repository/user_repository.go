@@ -25,6 +25,6 @@ func (r *userRepository) Create(user *model.User) error {
 
 func (r *userRepository) FindByEmail(email string) (*model.User, error) {
 	var user model.User
-	err := r.db.Where("email = ?", email).First(&user).Error // changed from username to email
+	err := r.db.Where("email = ?", email).First(&user).Error
 	return &user, err
 }
