@@ -31,7 +31,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.LoadHTMLGlob("templates/*") // Add this line to enable HTML template rendering
+	r.LoadHTMLGlob("templates/*")
 
 	r.GET("/register", func(c *gin.Context) {
 		c.HTML(200, "register.html", nil)
@@ -54,7 +54,9 @@ func main() {
 				c.JSON(404, gin.H{"error": "User not found"})
 				return
 			}
-			c.JSON(200, gin.H{"message": "Hello " + user.Username})
+			c.HTML(200, "dashboard.html", gin.H{
+				"username": user.Username,
+			})
 		})
 		protected.POST("/logout", userHandler.Logout)
 	}
