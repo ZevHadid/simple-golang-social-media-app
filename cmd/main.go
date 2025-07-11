@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 	"simple-golang-social-media-app/internal/handler"
 	"simple-golang-social-media-app/internal/middleware"
@@ -48,17 +49,32 @@ func main() {
 	protected := r.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 	{
-		protected.GET("/home", func(c *gin.Context) {
+		protected.GET("/", func(c *gin.Context) {
 			email, _ := c.Get("email")
 			user, err := userService.FindByEmail(email.(string))
 			if err != nil {
-				c.JSON(404, gin.H{"error": "User not found"})
+				c.Redirect(http.StatusFound, "/login?reason=unauthorized")
+				c.Abort()
 				return
 			}
 			c.HTML(200, "dashboard.html", gin.H{
 				"username": user.Username,
 			})
 		})
+
+		protected.GET("/write", func(c *gin.Context) {
+			email, _ := c.Get("email")
+			user, err := userService.FindByEmail(email.(string))
+			if err != nil {
+				c.Redirect(http.StatusFound, "/login?reason=unauthorized")
+				c.Abort()
+				return
+			}
+			c.HTML(200, "write.html", gin.H{
+				"username": user.Username,
+			})
+		})
+
 		protected.POST("/logout", userHandler.Logout)
 	}
 
