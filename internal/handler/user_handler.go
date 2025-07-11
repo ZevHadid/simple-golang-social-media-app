@@ -46,7 +46,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 
 	c.SetCookie("token", token, 3600, "/", "localhost", false, true)
-	c.Redirect(http.StatusFound, "/home")
+	c.Redirect(http.StatusFound, "/")
 }
 
 func (h *UserHandler) Login(c *gin.Context) {
@@ -70,7 +70,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	c.SetCookie("token", token, 3600, "/", "localhost", false, true)
-	c.Redirect(http.StatusFound, "/home")
+	c.Redirect(http.StatusFound, "/")
 }
 
 func (h *UserHandler) Logout(c *gin.Context) {
