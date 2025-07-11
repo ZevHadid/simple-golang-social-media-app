@@ -7,14 +7,17 @@
     <!-- Bootstrap CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="bg-light p-0 m-0">
     {{if .error}}
     <div class="alert alert-danger text-center" role="alert">
         {{.error}}
     </div>
     {{end}}
 
-    <div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="w-100 mb-5 text-center" id="alertPlaceholder"></div>
+
+    <div class="container-fluid d-flex flex-column align-items-center">
+
         <div class="card shadow-sm p-4" style="min-width: 320px; max-width: 350px;">
             <h2 class="mb-4 text-center">Login</h2>
             <form action="/login" method="POST">
@@ -30,5 +33,32 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reason = urlParams.get('reason');
+
+            let message = "";
+
+            if (reason === "no-auth-token-found") {
+                message = "No authentication token found. Please login.";
+            } else if (reason === "invalid-auth-token") {
+                message = "Invalid or expired authentication token. Please login again.";
+            } else if (reason) {
+                message = "An authentication problem has occurred. Please try again later.";
+            }
+
+            if (message) {
+                document.getElementById('alertPlaceholder').innerHTML = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+            }
+        });
+    </script>
+
 </body>
 </html>
